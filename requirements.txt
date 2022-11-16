@@ -3,3 +3,4 @@ django>=4.0.0,<4.1.0
 djangorestframework
 djangorestframework-simplejwt
 django-cors-headers
+psycopg2
