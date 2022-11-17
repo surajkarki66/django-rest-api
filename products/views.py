@@ -7,10 +7,10 @@ from .models import Product
 from api.authentication import TokenAuthentication
 from .serializers import ProductSerializer
 from api.permissions import IsStaffEditorPermission
-from api.mixins import StaffEditorPermissionMixin
+from api.mixins import StaffEditorPermissionMixin, UserQuerySetMixin
 
 
-class ProductListCreateAPIView(StaffEditorPermissionMixin, generics.ListCreateAPIView):
+class ProductListCreateAPIView(UserQuerySetMixin, generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     # # you can use this inside permission_class => permissions.DjangoModelPermissions => this for user staff having access to particular model
@@ -21,7 +21,16 @@ class ProductListCreateAPIView(StaffEditorPermissionMixin, generics.ListCreateAP
         content = serializer.validated_data.get('content') or None
         if content is None:
             content = title
-        serializer.save(content=content)
+        serializer.save(user=self.request.user, content=content)
+
+    # def get_queryset(self, *args, **kwargs):
+    #     # only product created by the user is shown
+    #     qs = super().get_queryset(*args, **kwargs)
+    #     request = self.request
+    #     user = request.user
+    #     if not user.is_authenticated:
+    #         return Product.objects.none()
+    #     return qs.filter(user=user)
 
 
 class ProductDetailAPIView(generics.RetrieveAPIView):
